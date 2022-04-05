@@ -1,73 +1,138 @@
-# Project Overview: Inventory Monitoring at Distribution Centers
+# Inventory Monitoring at Distribution Centers
 
-Distribution centers often use robots to move objects as a part of their operations. Objects are carried in bins which can contain multiple objects. In this project, you will have to build a model that can count the number of objects in each bin. A system like this can be used to track inventory and make sure that delivery consignments have the correct number of items.
+## Definition
 
-To build this project you will use AWS SageMaker and good machine learning engineering practices to fetch data from a database, preprocess it, and then train a machine learning model. This project will serve as a demonstration of end-to-end machine learning engineering skills that you have learned as a part of this nanodegree.
+### Project Overview
 
-# How it Works
+Most distribution centers all over the world use robots to move objects from one place to another. These robots use bins which contains multiple objects. Determining the number of objects in each bin can be very valuable in order to check that the process is working as expected.
 
-To complete this project we will be using the <a href="https://registry.opendata.aws/amazon-bin-imagery/" target="_blank">Amazon Bin Image Dataset</a>. The dataset contains 500,000 images of bins containing one or more objects. For each image there is a metadata file containing information about the image like the number of objects, it's dimension and the type of object. For this task, we will try to classify the number of objects in each bin.
+The main goal of this project is to build a ML model that can count the number of objects in each bin in order to track inventory and check that bins have the appropriate number of items in order to reduce stock mismatches. 
 
-To perform the classification you can use a model type and architecture of your choice. For instance you could use a pre-trained convolutional neural network, or you could create your own neural network architecture. However, you will need to train your model using SageMaker.
+### Problem Statement
 
-Once you have trained your model you can attempt some of the Standout Suggestion to get the extra practice and to turn your project into a portfolio piece.
+Based on the background, it can be seen that the problem to be resolved here is related to image classification. A ton of images have been provided by our client (Amazon) and a ML model will be built in order to identify the number of objects in each bin.
 
-# Pipeline
+### Metrics
 
-To finish this project, you will have to perform the following tasks:
+For this case, we will use both, the model accuracy (based on the images which are correctly identified by the model) and the Root Mean Square Error (RMSE) metrics in order to evaluate how the model is performing.
 
-1. Upload Training Data: First you will have to upload the training data to an S3 bucket.
-1. Model Training Script: Once you have done that, you will have to write a script to train a model on that dataset.
-1. Train in SageMaker: Finally, you will have to use SageMaker to run that training script and train your model
+These metrics will be used at the end of each epoch in order to observe how the model is improving its results. 
 
-Here are the tasks you have to do in more detail:
 
-## Setup AWS
-To build this project, you wlll have to use AWS through your classroom. Below are your main steps:
-- Open AWS through the classroom on the left panel (**Open AWS Gateway**)
-- Open SageMaker Studio and create a folder for your project
 
-## Download the Starter Files
-We have provided a project template and some helpful starter files for this project. You can clone the Github Repo.
-- Clone of download starter files from Github
-- Upload starter files to your workspace
+## Analysis
 
-## Preparing Data
-To build this project you will have to use the [Amazon Bin Images Dataset](https://registry.opendata.aws/amazon-bin-imagery/)
-- Download the dataset: Since this is a large dataset, you have been provided with some code to download a small subset of that data. You are encouraged to use this subset to prevent any excess SageMaker credit usage.
-- Preprocess and clean the files (if needed)
-- Upload them to an S3 bucket so that SageMaker can use them for training
-- OPTIONAL: Verify that the data has been uploaded correctly to the right bucket using the AWS S3 CLI or the S3 UI
+### Data Exploration
 
-## Starter Code
-Familiarize yourself with the following starter code
-- `sagemaker.ipynb`
-- `train.py`
+The dataset used for the project will be the [Amazon Bin Image Dataset](https://registry.opendata.aws/amazon-bin-imagery/) which contains more than 500,000 images and metadata from bins of a pod in an operating Amazon Fulfillment Center. Both, images and metadata, will be used to develop the model. 
 
-## Create a Training Script
-Complete the TODO's in the `train.py` script
-- Read and Preprocess data: Before training your model, you will need to read, load and preprocess your training, testing and validation data
-- Train your Model: You can choose any model type or architecture for this project
+Images will be used as the main input in the training phase. Metadata will be used in order to arrange the pictures in a way that the ML model will identify the number of possible classes.
 
-## Train using SageMaker
-Complete the TODO's in the `sagemaker.ipynb` notebook
-- Install necessary dependencies
-- Setup the training estimator
-- Submit the job
+Amazon provide us with these images via S3. Specifically, both, images and metadata, are stored on the `aft-vbi-pds` bucket. 
 
-## Final Steps
-An important part of your project is creating a `README` file that describes the project, explains how to set up and run the code, and describes your results. We've included a template in the starter files (that you downloaded earlier), with `TODOs` for each of the things you should include.
-- Complete the `README` file
+* Images are stored in the `bin-images` folder. Each image is a different `JPG` file whose name is similar to `<X>.jpg` being `<X>` a number. 
+* Metadata is stored in the `metadata` folder. Each image has a corresponding metadata file whose format is JSON. The most important field of these JSON files is `EXPECTED_QUANTITY` as it contains the number of objects which can be found on the specific image. 
 
-# Standout Suggestions
+For the scope of this project, we will focus on pictures contain 0 to 5 objects. 
 
-Standout suggestions are some recommendations to help you take your project further and turn it into a nice portfolio piece. If you have been having a good time working on this project and want some additional practice, then we recommend that you try them. However, do not that these suggestions are all optional and you can skip any (or all) of them and submit the project in the next page.
+### Exploratory Visualization
 
-Here are some of suggestions to improve your project:
+The following picture is an example of a bin with no objects.
 
-* **Model Deployment:** Once you have trained your model, can you deploy your model to a SageMaker endpoint and then query it with an image to get a prediction?
-* **Hyperparameter Tuning**: To improve the performance of your model, can you use SageMaker’s Hyperparameter Tuning to search through a hyperparameter space and get the value of the best hyperparameters?
-* **Reduce Costs:** To reduce the cost of your machine learning engineering pipeline, can you do a cost analysis and use spot instances to train your model?
-* **Multi-Instance Training:** Can you train the same model, but this time distribute your training workload across multiple instances?
+<img src="/Users/aitor/Desktop/images/example_0_objects.jpeg" alt="example_picture" style="zoom: 50%;" />
 
-Once you have completed the standout suggestions, make sure that you explain what you did and how you did it in the `README`. This way the reviewers will look out for it and can give you helpful tips and suggestions!
+While this one is an example of a bin with 1 object:
+
+<img src="/Users/aitor/Desktop/images/example_1_objects.jpeg" alt="example_1_objects" style="zoom:35%;" />
+
+As can be seen, each picture has different sizes, so it will be critical to resize all these pictures un order the model to work properly. 
+
+On the other hand, here is an example of a metadata file. In this case, the JSON is describing a picture with one object (it refers to the previous picture):
+
+<img src="/Users/aitor/Desktop/images/example_json.png" alt="example_json" style="zoom:35%;" /> 
+
+### Algorithms and Techniques
+
+In this project a ML model has been built to identify the number of objects in each image. In order to build this ML model, SageMaker has been used, training a model using a ResNet neuronal network. 
+
+ResNet model is widely used for image classification which is pretrained and can be customized in order to categorize images from different use cases. To adapt this pretrained model to our use case, different training jobs will be launched in AWS SageMaker. In addition, hyperparameters tunning jobs has been launched in order to find the most appropriate combination of hyperparameters for our use case. 
+
+### Benchmark
+
+Others have worked on the same data to build their own models. Specifically, we can find two GitHub projects related to this problem:
+
+1. [Amazon Bin Image Dataset (ABID) Challenge by silverbottlep](https://github.com/silverbottlep/abid_challenge)
+2. [Amazon Inventory Reconciliation using AI by Pablo Rodriguez Bertorello, Sravan Sripada, Nutchapol Dendumrongsup](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN)
+
+As can be seen in the conclusions of both projects, the obtained accuracy is 55% approximately with a RMSE of 0.94. In the results sections, a comparison between the results of my model and the results of these project can be found.  
+
+## Methodology
+
+### Data preprocessing
+
+The first step to train a model is to download an process the data which will be used as the input. As stated before, we have decided to focus on pictures with 0 to 5 objects. Each picture will be assigned a class according to the following rule:
+
+* Class 1 for pictures without objects
+* Class 2 for pictures with 1 object
+* Class 3 for pictures with 2 objects
+* Class 4 for pictures with 3 objects
+* Class 5 for pictures with 4 objects
+* Class 6 for pictures with 5 objects
+
+For each class, I decided to download 1,000 images: 800 will be used as input for the training phase, while 200 will be used as input for the validation phase.
+
+In order to download these 6,000 pictures, a Python script has been created. The script can be found at the project Jupyter notebook (file `sagemaker.ipynb`). Specifically, the script will iterate over the JSON files from the Amazon dataset and will download the picture if it contains 0 to 5 objects and the number of objects downloader for the specific class is below 1,000. 
+
+Finally, all these pictures were uploaded to S3, as it is the entry point for data for models being trained on AWS. 
+
+### Implementation
+
+As stated before, I planned to use a ResNet neuronal network to train the model. As a base I used [this Python training script](https://github.com/aitormagan/CD0387-deep-learning-topics-within-computer-vision-nlp-project-starter/blob/main/train_model.py), which is the one I implemented for the "Image Classification" project of this course (file `train.py`). I adapted the number of classes (from 133 to 6) and configured the transformation part in order to deal with the new set of images (i.e. resizing). Then I launched this script through the Jupyter Notebook. However, the first results, as can be seen on this screenshot, were not very promising, with a RMSE of 1.55 and an accuracy of 31,60%.
+
+![firsr_result](/Users/aitor/Desktop/images/firsr_result.png)
+
+This first script used a pretrained ResNet18 neuronal network for training. In order to obtain a more accurate model, I tried the same script but with different ResNet networks. I tested with ResNet50 and the results were pretty similar.
+
+However, reading the [project done by Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN), I discovered they were using a ResNet34 non-pretrained network, so I decided to move my project to this implementation (ResNet34) but with a pretrained network. With this implementation, accuracy was 38% and RMSE dropped to 1.38, which was not perfect but better than the results obtained on the first attempt.
+
+### Refinement
+
+At this state, I decided it was high time to tune the hyperparameters in order to find a better combination of them which allow me to obtain a more precise model. Specifically, these hyperparameters were tuned:
+
+* The number of epochs
+* The batch size (the number of images being trained on each iteration)
+* The learning rate (`lr`)
+
+Here is a screenshot of the hyperparameters job launched on AWS:
+
+<img src="/Users/aitor/Desktop/images/hyperparameters_tunning_job.png" alt="hyperparameters_tunning_job" style="zoom:50%;" />
+
+After completing, the best hyperparameters combination was the following one:
+
+* Epochs: 12
+* Batch Size: 256
+* Learning Rate: 0.0055476177746041485
+
+With this combination, testing accuracy spiked to 41% and RMSE was reduced to 1.36, as can be seen on the following screenshot. 
+
+![hyperparameters_tunning_best_job](/Users/aitor/Desktop/images/hyperparameters_tunning_best_job.png)
+
+## Results
+
+### Model Evaluation and Validation
+
+As can be seen on the previous picture, results were very poor if compared with the ones obtained on other projects such as the one developer by [Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN) were a RMSE of 0.94 is obtained on the testing phase. At this point, I decided to launch [their training script](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN/blob/master/convolutional-neural-network/training.py) against my dataset. 
+
+To do so, I modified their script so it can be run on AWS with the input being stored on S3 (file: `train_external.py`). Once executed, here is an screenshot of the results I obtained:
+
+![gpu_model](/Users/aitor/Desktop/images/gpu_model.png)
+
+As can be seen, results with the same input was pretty close to what I obtained, with a RMSE of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this results, my script only requires 12. 
+
+### Justification
+
+As stated before, both training scripts, the one I developed and the one developed by the team of Pablo Rodriguez, generated pretty close results with testing accuracy differing in just 3 points (40,9% to 43,80%). 
+
+Based on this, I tried to obtain better results by moving my script to GPUs, so I can get results more quickly with a higher number of epochs. However, when I tried to launch this script using GPUs, I discovered that Udacity has limited my permissions to launch this type of jobs (as can be seen on the attached screenshot), so I decided this was a good time to stop since I have no more options to improve my model. 
+
+![error_gpu](/Users/aitor/Desktop/images/error_launch_gpu.png)
