@@ -39,17 +39,17 @@ For the scope of this project, we will focus on pictures contain 0 to 5 objects.
 
 The following picture is an example of a bin with no objects.
 
-<img src="/Users/aitor/Desktop/images/example_0_objects.jpeg" alt="example_picture" style="zoom: 50%;" />
+<img src="images/example_0_objects.jpeg" alt="example_picture" style="zoom: 50%;" />
 
 While this one is an example of a bin with 1 object:
 
-<img src="/Users/aitor/Desktop/images/example_1_objects.jpeg" alt="example_1_objects" style="zoom:35%;" />
+<img src="images/example_1_objects.jpeg" alt="example_1_objects" style="zoom:35%;" />
 
 As can be seen, each picture has different sizes, so it will be critical to resize all these pictures un order the model to work properly. 
 
 On the other hand, here is an example of a metadata file. In this case, the JSON is describing a picture with one object (it refers to the previous picture):
 
-<img src="/Users/aitor/Desktop/images/example_json.png" alt="example_json" style="zoom:35%;" /> 
+<img src="images/example_json.png" alt="example_json" style="zoom:35%;" /> 
 
 ### Algorithms and Techniques
 
@@ -89,7 +89,7 @@ Finally, all these pictures were uploaded to S3, as it is the entry point for da
 
 As stated before, I planned to use a ResNet neuronal network to train the model. As a base I used [this Python training script](https://github.com/aitormagan/CD0387-deep-learning-topics-within-computer-vision-nlp-project-starter/blob/main/train_model.py), which is the one I implemented for the "Image Classification" project of this course (file `train.py`). I adapted the number of classes (from 133 to 6) and configured the transformation part in order to deal with the new set of images (i.e. resizing). Then I launched this script through the Jupyter Notebook. However, the first results, as can be seen on this screenshot, were not very promising, with a RMSE of 1.55 and an accuracy of 31,60%.
 
-![firsr_result](/Users/aitor/Desktop/images/firsr_result.png)
+![firsr_result](images/firsr_result.png)
 
 This first script used a pretrained ResNet18 neuronal network for training. In order to obtain a more accurate model, I tried the same script but with different ResNet networks. I tested with ResNet50 and the results were pretty similar.
 
@@ -105,7 +105,7 @@ At this state, I decided it was high time to tune the hyperparameters in order t
 
 Here is a screenshot of the hyperparameters job launched on AWS:
 
-<img src="/Users/aitor/Desktop/images/hyperparameters_tunning_job.png" alt="hyperparameters_tunning_job" style="zoom:50%;" />
+<img src="images/hyperparameters_tunning_job.png" alt="hyperparameters_tunning_job" style="zoom:50%;" />
 
 After completing, the best hyperparameters combination was the following one:
 
@@ -115,7 +115,7 @@ After completing, the best hyperparameters combination was the following one:
 
 With this combination, testing accuracy spiked to 41% and RMSE was reduced to 1.36, as can be seen on the following screenshot. 
 
-![hyperparameters_tunning_best_job](/Users/aitor/Desktop/images/hyperparameters_tunning_best_job.png)
+![hyperparameters_tunning_best_job](images/hyperparameters_tunning_best_job.png)
 
 ## Results
 
@@ -125,7 +125,7 @@ As can be seen on the previous picture, results were very poor if compared with 
 
 To do so, I modified their script so it can be run on AWS with the input being stored on S3 (file: `train_external.py`). Once executed, here is an screenshot of the results I obtained:
 
-![gpu_model](/Users/aitor/Desktop/images/gpu_model.png)
+![gpu_model](images/gpu_model.png)
 
 As can be seen, results with the same input was pretty close to what I obtained, with a RMSE of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this results, my script only requires 12. 
 
@@ -135,4 +135,4 @@ As stated before, both training scripts, the one I developed and the one develop
 
 Based on this, I tried to obtain better results by moving my script to GPUs, so I can get results more quickly with a higher number of epochs. However, when I tried to launch this script using GPUs, I discovered that Udacity has limited my permissions to launch this type of jobs (as can be seen on the attached screenshot), so I decided this was a good time to stop since I have no more options to improve my model. 
 
-![error_gpu](/Users/aitor/Desktop/images/error_launch_gpu.png)
+![error_gpu](images/error_launch_gpu.png)
