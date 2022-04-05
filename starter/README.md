@@ -127,7 +127,7 @@ To do so, I modified their script so it can be run on AWS with the input being s
 
 ![gpu_model](images/gpu_model.png)
 
-As can be seen, results with the same input was pretty close to what I obtained, with a RMSE of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this results, my script only requires 12. 
+As can be seen, results with the same input was pretty close to what I obtained, with a RMSE of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this result, my script only requires 12. 
 
 ### Justification
 
