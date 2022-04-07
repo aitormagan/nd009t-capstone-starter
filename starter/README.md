@@ -81,19 +81,28 @@ The first step to train a model is to download an process the data which will be
 
 For each class, I decided to download 1,000 images: 800 will be used as input for the training phase, while 200 will be used as input for the validation phase.
 
-In order to download these 6,000 pictures, a Python script has been created. The script can be found at the project Jupyter notebook (file `sagemaker.ipynb`). Specifically, the script will iterate over the JSON files from the Amazon dataset and will download the picture if it contains 0 to 5 objects and the number of objects downloader for the specific class is below 1,000. 
+In order to download these 6,000 pictures, a Python script has been created. The script can be found at the project Jupyter notebook (file `sagemaker.ipynb`). Specifically, the script will iterate over the JSON files from the Amazon dataset and will download the picture if it contains 0 to 5 objects and the number of objects downloaded for the specific class is below 1,000. 
 
 Finally, all these pictures were uploaded to S3, as it is the entry point for data for models being trained on AWS. 
 
 ### Implementation
 
-As stated before, I planned to use a ResNet neuronal network to train the model. As a base I used [this Python training script](https://github.com/aitormagan/CD0387-deep-learning-topics-within-computer-vision-nlp-project-starter/blob/main/train_model.py), which is the one I implemented for the "Image Classification" project of this course (file `train.py`). I adapted the number of classes (from 133 to 6) and configured the transformation part in order to deal with the new set of images (i.e. resizing). Then I launched this script through the Jupyter Notebook. However, the first results, as can be seen on this screenshot, were not very promising, with a RMSE of 1.55 and an accuracy of 31,60%.
+As stated before, I planned to use a ResNet neuronal network to train the model. As a base I used [this Python training script](https://github.com/aitormagan/CD0387-deep-learning-topics-within-computer-vision-nlp-project-starter/blob/main/train_model.py), which is the one I implemented for the "Image Classification" project of this course (file `train.py`). The following adjustements were made:
+
+1. Number of classes is 6
+2. Modify transofmrations:
+  1. Resize images to 224x224 so all the images have the same size
+  2. Apply random horizontal flip
+  3. Apply normalizationn (zero mean and unit variance)
+
+
+Then I launched this script through the Jupyter Notebook. However, the first results, as can be seen on this screenshot, were not very promising, with an average loss of 1.55 and an accuracy of 31,60%.
 
 ![firsr_result](images/firsr_result.png)
 
 This first script used a pretrained ResNet18 neuronal network for training. In order to obtain a more accurate model, I tried the same script but with different ResNet networks. I tested with ResNet50 and the results were pretty similar.
 
-However, reading the [project done by Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN), I discovered they were using a ResNet34 non-pretrained network, so I decided to move my project to this implementation (ResNet34) but with a pretrained network. With this implementation, accuracy was 38% and RMSE dropped to 1.38, which was not perfect but better than the results obtained on the first attempt.
+However, reading the [project done by Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN), I discovered they were using a ResNet34 non-pretrained network, so I decided to move my project to this implementation (ResNet34) but with a pretrained network. With this implementation, accuracy was 38% and average loss dropped to 1.38, which was not perfect but better than the results obtained on the first attempt.
 
 ### Refinement
 
@@ -113,7 +122,7 @@ After completing, the best hyperparameters combination was the following one:
 * Batch Size: 256
 * Learning Rate: 0.0055476177746041485
 
-With this combination, testing accuracy spiked to 41% and RMSE was reduced to 1.36, as can be seen on the following screenshot. 
+With this combination, testing accuracy spiked to 41% and average loss was reduced to 1.36, as can be seen on the following screenshot. 
 
 ![hyperparameters_tunning_best_job](images/hyperparameters_tunning_best_job.png)
 
@@ -121,18 +130,34 @@ With this combination, testing accuracy spiked to 41% and RMSE was reduced to 1.
 
 ### Model Evaluation and Validation
 
-As can be seen on the previous picture, results were very poor if compared with the ones obtained on other projects such as the one developer by [Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN) were a RMSE of 0.94 is obtained on the testing phase. At this point, I decided to launch [their training script](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN/blob/master/convolutional-neural-network/training.py) against my dataset. 
+In order to calculate the RMSE and compare the results of my models with the ones developer by others, I deployed the model and executed an inference for every test objects (check the Jupyter notebook). Here are the results:
+
+| Class | Accuracy | RMSE |
+|---|---|---|
+| 0 | 89% | 0.52 |
+| 1 | 37.5% | 2.12 |
+| 2 | 13.5% | 1.91 |
+| 3 | 12% | 1.55 |
+| 4 | 33.5% | 1.15 |
+| 5 | 43% | 1.49 |
+| Average | 45.7% | 1.70 |
+
+As can be seen on this table, results are very poor if compared with the ones obtained on other projects such as the one developer by [Pablo Rodriguez et al.](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN) were a RMSE of 0.94 is obtained on the testing phase. At this point, I decided to launch [their training script](https://github.com/pablo-tech/Image-Inventory-Reconciliation-with-SVM-and-CNN/blob/master/convolutional-neural-network/training.py) against my dataset. 
 
 To do so, I modified their script so it can be run on AWS with the input being stored on S3 (file: `train_external.py`). Once executed, here is an screenshot of the results I obtained:
 
 ![gpu_model](images/gpu_model.png)
 
-As can be seen, results with the same input was pretty close to what I obtained, with a RMSE of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this result, my script only requires 12. 
+As can be seen, results with the same input was pretty close to what I obtained, with an average loss of 1.27 and an accuracy of 43,8%. It's important to note that while their script requires 40 epochs to obtain this result, my script only requires 12, so the problem is not with my training script but with the model input. 
 
 ### Justification
 
-As stated before, both training scripts, the one I developed and the one developed by the team of Pablo Rodriguez, generated pretty close results with testing accuracy differing in just 3 points (40,9% to 43,80%). 
-
-Based on this, I tried to obtain better results by moving my script to GPUs, so I can get results more quickly with a higher number of epochs. However, when I tried to launch this script using GPUs, I discovered that Udacity has limited my permissions to launch this type of jobs (as can be seen on the attached screenshot), so I decided this was a good time to stop since I have no more options to improve my model. 
+It is important to note that the results obtained by the team of Pablo Rodriguez were achieved by using a dataset of 150k images (according to their paper) which can be processed in an assumable amount of time when using GPUs. However, when I tried to adapt my script to be run on GPUs, I found that Udacity has limited by ability to launch jobs where GPUs are available as can be seen on the following screeshot.
 
 ![error_gpu](images/error_launch_gpu.png)
+
+At this stage, the only option for my model to be more precise is to have a bigger dataset. However, dealing with a bigger dataset requires a level of computational power which I cannot use due to the limitations of the platform. A good continuation for this project will be trying to train the model on GPUs with a bigger dataset (+100k images).
+
+Nevertheless, it's important to remark that the model I developed, has a similar average loss and accuracy than the one developed by the team of Pablo Rodriguez when the same input dataset is used. 
+
+A random guesser will be able to clasify a 16% of the pictures (`100/6=16.66....`). Hence, my model will be more precise than a random guesser when trying to identify bins with 0, 1, 4 and 5 objects.
