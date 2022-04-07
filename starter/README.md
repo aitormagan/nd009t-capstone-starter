@@ -90,10 +90,10 @@ Finally, all these pictures were uploaded to S3, as it is the entry point for da
 As stated before, I planned to use a ResNet neuronal network to train the model. As a base I used [this Python training script](https://github.com/aitormagan/CD0387-deep-learning-topics-within-computer-vision-nlp-project-starter/blob/main/train_model.py), which is the one I implemented for the "Image Classification" project of this course (file `train.py`). The following adjustements were made:
 
 1. Number of classes is 6
-2. Modify transofmrations:
-  1. Resize images to 224x224 so all the images have the same size
-  2. Apply random horizontal flip
-  3. Apply normalizationn (zero mean and unit variance)
+2. Apply transformations:
+   1. Resize images to 224x224 so all the images have the same size
+   2. Apply random horizontal flip
+   3. Apply normalizationn (zero mean and unit variance)
 
 
 Then I launched this script through the Jupyter Notebook. However, the first results, as can be seen on this screenshot, were not very promising, with an average loss of 1.55 and an accuracy of 31,60%.
