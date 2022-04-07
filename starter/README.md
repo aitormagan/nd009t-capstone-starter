@@ -130,7 +130,7 @@ With this combination, testing accuracy spiked to 41% and average loss was reduc
 
 ### Model Evaluation and Validation
 
-In order to calculate the RMSE and compare the results of my models with the ones developer by others, I deployed the model and executed an inference for every test objects (check the Jupyter notebook). Here are the results:
+In order to calculate the RMSE and compare the results of my models with the ones developer by others, I deployed the model and executed an inference for every test object (check the Jupyter notebook). Here are the results:
 
 | Class | Accuracy | RMSE |
 |---|---|---|
@@ -152,7 +152,7 @@ As can be seen, results with the same input was pretty close to what I obtained,
 
 ### Justification
 
-It is important to note that the results obtained by the team of Pablo Rodriguez were achieved by using a dataset of 150k images (according to their paper) which can be processed in an assumable amount of time when using GPUs. However, when I tried to adapt my script to be run on GPUs, I found that Udacity has limited by ability to launch jobs where GPUs are available as can be seen on the following screeshot.
+The results obtained by the team of Pablo Rodriguez were achieved by using a dataset of 150k images (according to their paper) which can be processed in an assumable amount of time when using GPUs. However, when I tried to adapt my script to be run on GPUs, I found that Udacity has limited by ability to launch jobs where GPUs are available as can be seen on the following screeshot.
 
 ![error_gpu](images/error_launch_gpu.png)
 
@@ -160,4 +160,4 @@ At this stage, the only option for my model to be more precise is to have a bigg
 
 Nevertheless, it's important to remark that the model I developed, has a similar average loss and accuracy than the one developed by the team of Pablo Rodriguez when the same input dataset is used. 
 
-A random guesser will be able to clasify a 16% of the pictures (`100/6=16.66....`). Hence, my model will be more precise than a random guesser when trying to identify bins with 0, 1, 4 and 5 objects.
+Regarding the precision of my model, a random guesser will be able to clasify a 16% of the pictures (`100/6=16.66....`). Hence, my model will be more precise than a random guesser when trying to identify bins with 0, 1, 4 and 5 objects.
